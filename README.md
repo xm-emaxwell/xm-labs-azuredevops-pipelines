@@ -1,1 +1,1 @@
-# xm-labs-azuredevops
+# xm-labs-azuredevops-pipelines
