@@ -76,7 +76,7 @@ output['projectID'] = payload['ProjectId'];
 output['planID'] = payload['PlanId'];
 output['jobID'] = payload['JobId'];
 output['taskID'] = payload['TaskInstanceId'];
-output['authToken'] = payload['AuthToken'];
+output['callbackAuthToken'] = payload['AuthToken'];
 
 /*
 * Additional parameters that can be passed to other steps
