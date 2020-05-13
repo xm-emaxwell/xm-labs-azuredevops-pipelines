@@ -1,5 +1,5 @@
 /*
- Receives a request from an Azure DevOps release gate.  The request payload must contain the required
+ Receives a request from an Azure DevOps release gate task.  The request payload must contain the required
  parameters for other steps to make basic callbacks to update the Azure DevOps release gate status. The 
  payload must be in JSON format and follow the example below. You could use the Azure DevOps
  "Invoke REST API" task with the example payload.
@@ -78,7 +78,7 @@ output['projectID'] = payload['ProjectId'];
 output['planID'] = payload['PlanId'];
 output['jobID'] = payload['JobId'];
 output['taskID'] = payload['TaskInstanceId'];
-output['authToken'] = payload['AuthToken'];
+output['callbackAuthToken'] = payload['AuthToken'];
 
 //This is the only common value between ADO release gate polls
 output['timelineID'] = payload['TimelineId'];
@@ -91,3 +91,6 @@ output['projectName'] = payload['ProjectName'];
 output['recipients'] = payload['xmRecipients'];
 output['messageSubject'] = payload['xmSubject'];
 output['message'] = payload['xmMessage'];
+
+
+

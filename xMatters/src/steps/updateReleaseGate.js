@@ -10,14 +10,14 @@ const projectID = input['projectID'];
 const planID = input['planID'];
 const jobID = input['jobID'];
 const taskID = input['taskID'];
-const authToken = input['authToken'];
+const authToken = input['callbackAuthToken'];
 const result = input['result'];
 
 var URLPath = '/' + organization + '/' + projectID + '/_apis/distributedtask/hubs/gates/plans/' + planID + '/events?api-version=2.0-preview.1';
 var authProperty = 'Basic ' + base64.encode(":" + authToken);
 
 var apiRequest = http.request({
-    'endpoint': 'Azure DevOps - Release Callback',
+    'endpoint': 'Azure DevOps',
     'path': URLPath,
     'method': 'POST',
     'headers': {
@@ -29,7 +29,7 @@ var apiRequest = http.request({
 body =  { name: "TaskCompleted", taskId: taskID, jobId: jobID, result: result };
 
 var apiResponse = apiRequest.write(body);
-output['Response Code'] = apiResponse.statusCode;
+output['responseCode'] = apiResponse.statusCode;
 if(apiResponse.statusCode != 204) {
     throw 'ERROR:Invalid response from Azure DevOps';
 }
