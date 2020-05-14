@@ -1,0 +1,58 @@
+# This is an example Azure DevOps pipeline configuration that can be used with the 
+# example xMatters workflow. It uses the Invoke REST API task which is Agentless
+# so the pool for this task must be "server"
+
+# You can set the trigger to whatever you like. The demo will manually trigger the
+# pipeline from xMatters, but it will also work even if the pipeline is triggered
+# via a different method.
+trigger:
+    - master
+    
+    pool: server
+    
+    steps:
+    
+    - task: InvokeRESTAPI@1
+      inputs:
+        connectionType: 'connectedServiceName'
+        # This must be the Service Connection you created to your xMatters instance
+        serviceConnection: 'xMatters'
+        method: 'POST'
+        # Set xmSubject to what you want xMatters to use as the notification subject
+        # Set xmMessage to what you wnat xMatters to use as the notification message
+        # Set xmRecipients with a comma separated list of xMatters users and/or groups you
+        # want the notification sent too.
+        body: |
+          {
+              "PlanUrl": "$(system.CollectionUri)",
+              "ProjectId": "$(system.TeamProjectId)",
+              "ProjectName": "$(system.TeamProject)",
+              "HubName": "$(system.HostType)",
+              "PlanId": "$(system.PlanId)",
+              "JobId": "$(system.JobId)",
+              "JobName": "$(system.JobDisplayName)",
+              "TimelineId": "$(system.TimelineId)",
+              "TaskInstanceId": "$(system.TaskInstanceId)",
+              "AuthToken": "$(system.AccessToken)",
+              "BuildId": "$(build.BuildId)",
+              "BuildNumber": "$(Build.BuildNumber)",
+              "PipelineName": "$(build.DefinitionName)",
+              "QueuedBy": "$(build.QueuedBy)",
+              "Reason": "$(build.Reason)",
+              "RepoName": "$(build.Repository.Name)",
+              "Branch": "$(Build.SourceBranchName)",
+              "Commit": "$(build.SourceVersion)",
+              "CommitMessage": "$(build.SourceVersionMessage)",
+              "StageName": "$(system.StageDisplayName)",
+              "xmSubject": "Build Requires Approval",
+              "xmMessage": "This build requires at least one approval.",
+              "xmRecipients": "SREs"
+          }
+        # Your xMatters trigger path. Do not include the xMatters instance domain. That is
+        # provided by the Service Connection
+        urlSuffix: 'api/integration/1/functions/aa123de0-456e-7890-a937-46f668b27723/triggers'
+        # This will set the task to create a callback and wait for a reply. In the UI settings
+        # it is called "Completion event".  If you change to false it will not wait for the
+        # xMatters flow to update the task status. The task will pass if the request is 
+        # successful, which if the connection settings are right it should.
+        waitForCompletion: 'true'
