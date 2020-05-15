@@ -362,6 +362,7 @@ We will now configure the Endpoints in xMatters so that flow steps can connect t
 
 #### :blue_book: NOTE
 > The build queue and pipeline task steps will use a different endpoint than the update release gate step. This is because the release gate update accesses an endpoint at different domain than the others.
+>
 > The pipeline task and update release steps both use the callback token supplied in the Azure DevOps request. The pipeline task can share the same endpoint as the build queue step because they use the same base URL. In the case of the pipeline task the basic auth credentials are ignored by Azure DevOps and it uses the token.
 
 1. Go back to the example workflow in xMatters and select the **FLOWS** tab. In the top right open the **Components** menu and select **Endpoints**
