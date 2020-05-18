@@ -43,7 +43,6 @@ Example payload from Azure DevOps:
     "BuildId": "$(build.BuildId)",
     "BuildNumber": "$(Build.BuildNumber)",
     "PipelineName": "$(build.DefinitionName)",
-    "RepoName": "$(build.Repository.Name)",
     "Branch": "$(Build.SourceBranchName)",
     "Commit": "$(build.SourceVersion)",
     "DefinitionName": "$(build.DefinitionName)",
@@ -80,7 +79,11 @@ output['jobID'] = payload['JobId'];
 output['taskID'] = payload['TaskInstanceId'];
 output['callbackAuthToken'] = payload['AuthToken'];
 
-//This is the only common value between ADO release gate polls
+/**
+* This is the only common value between ADO release gate polls. This value can
+* be passed in an event. Then if another poll is received from Azure DevOps
+* release gate it can be used to find previous events for the same release.
+*/
 output['timelineID'] = payload['TimelineId'];
 
 /*
@@ -88,6 +91,13 @@ output['timelineID'] = payload['TimelineId'];
 */
 
 output['projectName'] = payload['ProjectName'];
+output['pipelineName'] = payload['PipelineName'];
+output['buildId'] = payload['BuildId'];
+output['buildNumber'] = payload['BuildNumber'];
+output['repositoryProvider'] = payload['RepositoryProvider'];
+output['repositoryName'] = payload['RepositoryName'];
+output['branch'] = payload['Branch'];
+output['commit'] = payload['Commit'];
 output['recipients'] = payload['xmRecipients'];
 output['messageSubject'] = payload['xmSubject'];
 output['message'] = payload['xmMessage'];
