@@ -31,7 +31,7 @@ This is a two-way integration with Azure DevOps Pipelines that provides several 
         * [updateReleaseGate.js](xMatters/src/steps/updateReleaseGate.js) - source for step to update the release gate status
         * [checkResponseCount.js](xMatters/src/steps/checkResponseCounts.js) - source for step that checks if the response count meets the configured response threshold for an xMatters event. **Used in the release gate example**
     * Shared Libraries
-        * [base64.js](xMatters/src/shared libraries/base64.js) - source for library used by some of the steps to encode the callback authentication token
+        * [base64.js](xMatters/src/sharedLibs/base64.js) - source for library used by some of the steps to encode the callback authentication token
 * Azure DevOps
     * [InvokeRESTAPI_taskPayload.json](AzureDevOps/src/InvokeRESTAPI_taskPayload.json) - body to use with the "Invoke REST API" pipeline task
     * [InvokeRESTAPI_gatePayload.json](AzureDevOps/src/InvokeRESTAPI_gatePayload.json) - body to use with the "Invoke REST API" gate task
@@ -450,13 +450,13 @@ You now need to configure the Queue Build flow to point to the example Azure Dev
         <img src="media/xm-testing-3.png" width="300">
     </kbd>
 
-5. You should see your example pipeline in Azure DevOps start and if drill into the details you will see it is waiting on on the InvokeRESTAPI task. It is waiting on a reply from xMatters.
+5. You should see your example pipeline in Azure DevOps start and if you drill into the details you will see it is waiting on the InvokeRESTAPI task. It is waiting on a reply from xMatters.
 
     <kbd>
         <img src="media/xm-testing-4.png" width="300">
     </kbd>
 
-6. After a short time one of the targets you configured in the pipeline task payload field xmRecipients should recieve a notification similar to below (This is viewed from with xMatters app)
+6. After a short time one of the notification targets you configured in the pipeline task payload field xmRecipients should recieve a notification similar to below (This is viewed from with xMatters app)
 
     <kbd>
         <img src="media/xm-testing-5.jpg" width="300">
@@ -468,7 +468,7 @@ You now need to configure the Queue Build flow to point to the example Azure Dev
         <img src="media/xm-testing-6.jpg" width="300">
     </kbd>
 
-8. After short time you should see your example pipeline complete successfully.
+8. After a short time you should see your example pipeline complete successfully.
 
     <kbd>
         <img src="media/xm-testing-7.png" width="300">
@@ -480,7 +480,7 @@ You now need to configure the Queue Build flow to point to the example Azure Dev
         <img src="media/xm-testing-8.png" width="700">
     </kbd>
 
-10. After a short time one of the targets you configured in the release gate payload field xmRecipients should recieve a notification similar to below (This is viewed from with xMatters app)
+10. After a short time one of the notification targets you configured in the release gate payload field xmRecipients should recieve a notification similar to below (This is viewed from with xMatters app)
 
     <kbd>
         <img src="media/xm-testing-9.jpg" width="300">
@@ -500,8 +500,66 @@ You now need to configure the Queue Build flow to point to the example Azure Dev
 
 ---
 # Expanding
-These are some possible ways you can expand this integration with basic instructions.
+The example is using an approval type workflows to demonstrate triggering flows, sending notifications, and updating Azure DevOps. The xMatters flows can include other steps as well.  This includes things like creating a ServiceNow ticket, Jira Issue, update a Slack/MS Teams channel, etc.
 
+#### :warning: WARNING
+> When customizing for your use cases keep in mind that the Azure DevOps release gates use a polling mechanism. Keep the following points in mind when building or modifying a flow that is triggered by a release gate. The demo workflow tries to manage all these.
+> * The callback information, except Timeline ID, changes with each poll request and any updates must use this new information. The xMatters flow must take this into account.
+> * If the flow replies back to the gate poll with a failure the release gate polling will continue. That callback information will no longer be valid, so inorder to later reply with a success the flow must wait for another poll from Azure DevOps. The demo workflow never replies on a failure, because by default no reply is considered a failure by Azure DevOps.
 
 ---
 # Troubleshooting
+
+## Build is not queued by the xMatters Queue Build step
+
+* xMatters
+    * You can view the log in the Workflow Activity panel to help troubleshoot. [Instructions](https://help.xmatters.com/ondemand/xmodwelcome/flowdesigner/activity-panel.htm)
+    * Verify that you entered the correct organization, project, and pipeline names
+    * Verify that you have entered the correct credentials when setting up the **Azure DevOps** endpoint
+* Azure DevOps
+    * Verify the user and Persnal Access Token have the required permissions
+
+
+## Pipeline Task is not triggering xMatters flow
+
+* Azure DevOps
+    * Drill into the the build logs and check if there are any errors
+    * Verify that you entered the correct trigger endpoint URL. Do not include the xMatters instance domain and first slash, because this is supplied by the Service Connection. 
+    * Verify the **Service Connection** is configured with the correct credentials
+* xMatters
+    * Verify the xMatters account used for the Azure DevOps Service Connection has send permissions on the **Build Task** flow
+
+## xMatters flow not updating pipeline task correctly
+
+* xMatters
+    * You can view the log in the Workflow Activity panel to help troubleshoot. [Instructions](https://help.xmatters.com/ondemand/xmodwelcome/flowdesigner/activity-panel.htm)
+    * Verify the build task update steps are configured for the **Azure DevOps** endpoint.  Not the Azure DevOps - Release Gate endpoint.
+    * Verify that the **Azure DevOps** endpoint is configured correctly. This endpoint will be configured for Basic Auth, but the build task update steps use the auth token that Azure DevOps sends in the request to trigger the flow.
+    * Make sure the correct outputs of the trigger step are mapped to the inputs of the update steps.
+* Azure DevOps
+    * Make sure you configured the **Invoke REST API** task to use **Callback** as the **Completion event**.  If you leave it as ApiResponse it will succeed on a successful response to the initial request to xMatters, which if everything is configured correctly should be every time. Basically it will ignore the workflow outcome.
+
+## Release Gate is not triggering xMatters flow
+
+* Azure DevOps
+    * Drill into the the logs and check if there are any errors
+    * Verify that you entered the correct trigger endpoint URL. Do not include the xMatters instance domain and first slash, because this is supplied by the Service Connection. 
+    * Verify the **Service Connection** is configured with the correct credentials
+* xMatters
+    * Verify the xMatters account used for the Azure DevOps Service Connection has send permissions on the **Release Gate** flow
+
+## xMatters flow not updating gate correctly
+
+#### :blue_book: NOTE
+> Release gates work differently than pipeline tasks. Azure DevOps release polls the release gate endpoints waiting for a success status. So keep in mind.
+> * With each poll the callback information to update the gate changes except for the timeline ID, so this new information must be used to update the gate.
+> * If the xMatters flow replies with a failure the Azure DevOps release will continue to run and poll the gates, because it waits for all successes or it's configured timeout.
+> * If the xMatters flow replies with a failure the callback information will no longer be valid. If the flow then later needs to update the gate as success it will have to wait for a new poll with new callback information.
+
+* xMatters
+    * You can view the log in the Workflow Activity panel to help troubleshoot. [Instructions](https://help.xmatters.com/ondemand/xmodwelcome/flowdesigner/activity-panel.htm)
+    * Verify the release gate update steps are configured for the **Azure DevOps - Release Gate** endpoint.  Not the Azure DevOps.
+    * Verify that the **Azure DevOps - Release Gate** endpoint is configured correctly. This endpoint will be configured for No Auth and the release gate update steps use the auth token that Azure DevOps sends in the poll request to trigger the flow.
+    * Make sure the correct outputs of the trigger step are mapped to the inputs of the update steps.
+* Azure DevOps
+    * Make sure you configured the **Invoke REST API** task to use **Callback** as the **Completion event**.  If you leave it as ApiResponse it will succeed on a successful response to the initial request to xMatters, which if everything is configured correctly should be every time. Basically it will ignore the workflow outcome.
