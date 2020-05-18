@@ -6,6 +6,22 @@ This is a two-way integration with Azure DevOps Pipelines that provides several 
   <img src="https://github.com/xmatters/xMatters-Labs/raw/master/media/disclaimer.png">
 </kbd>
 
+# Table of Contents
+* [Pre-Requisites](#pre-requisites)
+* [Files](#files)
+* [How it Works](#how-it-works)
+* [Installation](#installation)
+    * [xMatters - Setup Inbound Trigger](#xmatters---setup-inbound-trigger)
+    * [Azure DevOps - Setup Credentials for xMatters](#azure-devops---setup-credentials-for-xmatters)
+    * [Azure DevOps - Setup Service Connection](#azure-devops---setup-service-connection)
+    * [Azure DevOps - Setup Pipeline Task](#azure-devops---setup-pipeline-task)
+    * [Azure DevOps - Configure Release](#azure-devops---configure-release)
+    * [xMatters - Configure Azure DevOps Endpoints](xmatters---configure-azure-devops-endpoints)
+    * [xMatters - Configure Queue Build Flow](xmatters---configure-queue-build-flow)
+* [Testing](#testing)
+* [Expanding](#expanding)
+* [Troubleshooting](#troubleshooting)
+
 ---
 # Pre-Requisites
 * Azure DevOps
@@ -500,7 +516,7 @@ You now need to configure the Queue Build flow to point to the example Azure Dev
 
 ---
 # Expanding
-The example is using an approval type workflows to demonstrate triggering flows, sending notifications, and updating Azure DevOps. The xMatters flows can include other steps as well.  This includes things like creating a ServiceNow ticket, Jira Issue, update a Slack/MS Teams channel, etc.
+The example is using an approval type workflows to demonstrate triggering flows, sending notifications, and updating Azure DevOps. The xMatters flows can include other steps as well.  This includes things like creating a ServiceNow ticket, Jira Issue, update a Slack/MS Teams channel, update status page, triggering other automation, of course sending notifications, etc.
 
 #### :warning: WARNING
 > When customizing for your use cases keep in mind that the Azure DevOps release gates use a polling mechanism. Keep the following points in mind when building or modifying a flow that is triggered by a release gate. The demo workflow tries to manage all these.
