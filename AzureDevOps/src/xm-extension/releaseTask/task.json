@@ -1,0 +1,119 @@
+{
+    "$schema": "https://raw.githubusercontent.com/Microsoft/azure-pipelines-task-lib/master/tasks.schema.json",
+    "id": "7b259e2d-d034-41a7-bff5-244db3ddb3e7",
+    "name": "xMattersReleaseTask",
+    "friendlyName": "xMatters Release Gate - Workflow Trigger",
+    "description": "Triggers a xMatters workflow",
+    "helpMarkDown": "",
+    "category": "Utility",
+    "author": "e2dmax",
+    "version": {
+        "Major": 0,
+        "Minor": 1,
+        "Patch": 0
+    },
+    "instanceNameFormat": "xMatters - Workflow Trigger",
+    "visibility": [
+        "Release"
+    ],
+    "groups": [
+        {
+            "name": "connectionSettings",
+            "displayName": "Connection Settings",
+            "isExpanded": true
+        },
+        {
+            "name": "notificationSettings",
+            "displayName": "xMatters Notification Settings",
+            "isExpanded": true
+        }
+    ],
+    "inputs": [
+        {
+            "name": "xMattersService",
+            "type": "connectedService:xMatters",
+            "label": "xMatters Service Endpoint",
+            "defaultValue": "",
+            "required": true,
+            "groupName": "connectionSettings",
+            "helpMarkDown": "Select the xMatters service connection to use. If needed, select 'manage', and add a new service connection of type 'xMatters'"
+        },
+        {
+            "name": "endpointPath",
+            "type": "string",
+            "label": "Workflow Endpoint Path",
+            "defaultValue": "",
+            "required": true,
+            "groupName": "connectionSettings",
+            "helpMarkDown": "Enter the path of the xMatters workflow HTTP Trigger. <u>**DO NOT**</u> include the domain portion or the beginning slash. In the below example trigger URL the endpoint path would be the red portion. <br><br><span style=\"color:blue\">https<span></span>://example.xmatters.com/</span><span style=\"color:red\">api/integration/1/functions/12345678-abcd-9101-efgh-11213141516/triggers</span>"
+        },
+        {
+            "name": "xmRecipients",
+            "type": "string",
+            "label": "xMatters Recipients (Users and/or Groups)",
+            "defaultValue": "",
+            "required": false,
+            "groupName": "notificationSettings",
+            "helpMarkDown": "Enter a comma separated list of xMatters users and/or groups that you want to notify when this workflow is triggered. This is an optional value and can be set directly with in the xMatters workflow."
+        },
+        {
+            "name": "xmSubject",
+            "type": "string",
+            "label": "xMatters Message Subject",
+            "defaultValue": "",
+            "required": false,
+            "groupName": "notificationSettings",
+            "helpMarkDown": "Subject of the notification that xMatters will send to target recipients. This is an optional value and can be set directly with in the xMatters workflow."
+        },
+        {
+            "name": "xmMessage",
+            "type": "multiLine",
+            "label": "xMatters Message",
+            "defaultValue": "",
+            "required": false,
+            "groupName": "notificationSettings",
+            "helpMarkDown": "Message xMatters is to send to target recipients. This is an optional value and can be set directly with in the xMatters workflow."
+        }
+    ],
+    "runsOn": [
+        "ServerGate"
+    ],
+    "execution": {
+        "HttpRequest": {
+            "Execute": {
+                "EndpointId": "$(xMattersService)",
+                "EndpointUrl": "$(endpoint.url)$(endpointPath)",
+                "Method": "POST",
+                "Body": {
+                    "PlanUrl": "$(system.CollectionUri)",
+                    "ProjectId": "$(system.TeamProjectId)",
+                    "ProjectName": "$(system.TeamProject)",
+                    "HubName": "$(system.HostType)",
+                    "PlanId": "$(system.PlanId)",
+                    "JobId": "$(system.JobId)",
+                    "TimelineId": "$(system.TimelineId)",
+                    "TaskInstanceId": "$(system.TaskInstanceId)",
+                    "AuthToken": "$(system.AccessToken)",
+                    "BuildId": "$(build.BuildId)",
+                    "BuildNumber": "$(Build.BuildNumber)",
+                    "PipelineName": "$(build.DefinitionName)",
+                    "Branch": "$(Build.SourceBranchName)",
+                    "Commit": "$(build.SourceVersion)",
+                    "DefinitionName": "$(build.DefinitionName)",
+                    "RepositoryName": "$(build.Repository.Name)",
+                    "RepositoryProvider": "$(build.Repository.Provider)",
+                    "RequestedFor": "$(build.RequestedFor)",
+                    "SourceBranch": "$(build.SourceBranch)",
+                    "SourceBranchName": "$(build.SourceBranchName)",
+                    "SourceVersion": "$(build.SourceVersion)",
+                    "xmSubject": "$(xmSubject)",
+                    "xmMessage": "$(xmMessage)",
+                    "xmRecipients": "$(xmRecipients)"
+                },
+                "Headers": {"Content-Type": "application/json"},
+                "WaitForCompletion": "true",
+                "Expression": ""
+            }
+        }
+    }
+}

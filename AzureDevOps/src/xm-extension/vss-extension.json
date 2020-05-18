@@ -1,0 +1,104 @@
+{
+    "manifestVersion": 1,
+    "id": "xmatters-integration-tools",
+    "name": "xMatters",
+    "version": "0.0.1",
+    "publisher": "e2dmax",
+    "targets": [
+        {
+            "id": "Microsoft.VisualStudio.Services"
+        }
+    ],    
+    "description": "Tools for integrating with xMatters. Includes service connection, pipeline task, and release gate task",
+    "categories": [
+        "Azure Pipelines"
+    ],
+    "icons": {
+        "default": "images/icon.png"        
+    },
+    "files": [
+        {
+            "path": "buildTask"
+        },
+        {
+            "path": "releaseTask"
+        }
+    ],
+    "contributions": [
+        {
+            "id": "service-endpoint",
+            "description": "Service connection for xMatters",
+            "type": "ms.vss-endpoint.service-endpoint-type",
+            "targets": [
+                "ms.vss-endpoint.endpoint-types"
+            ],
+            "properties": {
+                "name": "xmatters",
+                "displayName": "xMatters",
+                "url": {
+                    "displayName": "xMatters Instance URL",
+                    "helpText": "The xMatters instance URL. Example https://example.xmatters.com"
+                },
+                "dataSources": [
+                    {
+                        "name": "xMattersWorkflowUrl",
+                        "endpointUrl": "{{endpoint.url}}",
+                        "resultSelector": "jsonpath:$[*].nm"
+                    }
+                ],
+                "authenticationSchemes": [
+                    {
+                        "type": "ms.vss-endpoint.endpoint-auth-scheme-basic",
+                        "inputDescriptors": [
+                            {
+                                "id": "username",
+                                "name": "Username",
+                                "label": "Username/API Key",
+                                "description": "xMatters API key(preferred) or username",
+                                "inputMode": "textbox",
+                                "isConfidential": false,
+                                "validation": {
+                                    "isRequired": true,
+                                    "dataType": "string"
+                                }
+                            },
+                            {
+                                "id": "password",
+                                "name": "Password",
+                                "label": "Password/API Secret",
+                                "description": "xMatters API secret(preferred) or user password",
+                                "inputMode": "passwordbox",
+                                "isConfidential": true,
+                                "validation": {
+                                    "isRequired": true,
+                                    "dataType": "string"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "helpMarkDown": "<a href=\"https://help.xmatters.com/ondemand/xmodwelcome/communicationplanbuilder/formpermissions.htm\" target=\"_blank\"><b>xMatters Sender Permissions</b></a><br><br><a href=\"https://help.xmatters.com/ondemand/user/apikeys.htm\" target=\"_blank\"><b>xMatters API keys</b></a>"
+            }
+        },
+        {
+            "id": "custom-build-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "buildTask"
+            }
+        },
+        {
+            "id": "custom-release-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "releaseTask"
+            }
+        }
+    ]
+}
