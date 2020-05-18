@@ -7,7 +7,7 @@ This is a two-way integration with Azure DevOps Pipelines that provides several 
 </kbd>
 
 # Table of Contents
-* [Pre-Requisites](#pre-requisites)
+* [Prerequisites](#prerequisites)
 * [Files](#files)
 * [How it Works](#how-it-works)
 * [Installation](#installation)
@@ -23,7 +23,7 @@ This is a two-way integration with Azure DevOps Pipelines that provides several 
 * [Troubleshooting](#troubleshooting)
 
 ---
-# Pre-Requisites
+# Prerequisites
 * Azure DevOps
     * Azure DevOps Services account
     * Permission to setup Service Connections
@@ -33,7 +33,7 @@ This is a two-way integration with Azure DevOps Pipelines that provides several 
     * Permissions to create/edit Workflows
 
 ---
-## Files
+# Files
 * xMatters
     * Workflows
         * [AzureDevOpsPipelines.zip](xMatters/workflows/AzureDevOpsPipelines.zip) - example workflow containing all the triggers and steps
@@ -517,6 +517,11 @@ You now need to configure the Queue Build flow to point to the example Azure Dev
 ---
 # Expanding
 The example is using an approval type workflows to demonstrate triggering flows, sending notifications, and updating Azure DevOps. The xMatters flows can include other steps as well.  This includes things like creating a ServiceNow ticket, Jira Issue, update a Slack/MS Teams channel, update status page, triggering other automation, of course sending notifications, etc.
+
+#### :blue_book: NOTE
+> * **Invoke REST API (ApiResponse)** - If you configure the Azure DevOps Invoke REST API task's *Completion event* for ApiResponse it will trigger the xMatters flow, but it will continue on a successful response from the request. Use this when you want to trigger xMatters but do not care the outcome of the xMatters flow. In this case if you use the *Build Task Started* and *Build Task Completed* steps in your flow they will fail because the task will not exist for the callback.
+>
+> * **Invoke REST API (Callback)** - [Examples use this setting] If you configure the Azure DevOps Invoke REST API task's *Completion event* for Callback it will trigger the xMatters flow and wait for a callback containing the task status. Use this when you want the task status to reflect the xMatters flow outcome.
 
 #### :warning: WARNING
 > When customizing for your use cases keep in mind that the Azure DevOps release gates use a polling mechanism. Keep the following points in mind when building or modifying a flow that is triggered by a release gate. The demo workflow tries to manage all these.
