@@ -1,4 +1,4 @@
-# xMatters - Azure DevOps Extension
+# Azure DevOps xMatters Extension
 This is an example Azure DevOps extension that can be built and installed into your Azure DevOps organization to make configuring integrations with xMatters easier.
 
 ### :scroll: DISCLAIMER
