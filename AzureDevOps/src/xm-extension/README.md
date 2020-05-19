@@ -32,7 +32,7 @@ The instructions in this section are refering to the document located at [Develo
 
 1. Follow the instructions in the **Prerequisites** section to setup your local build environment.
 
-2. You can **skip** the **Create a directory and manifest** section and just clone this directory [xm-extension](../../AzureDevOps/src/xm-extension).
+2. You can **skip** the **Create a directory and manifest** section and just clone this directory [xm-extension](../../../AzureDevOps/src/xm-extension).
 
 3. Now go to the **Package and publish your extension** section and follow the instructions for setting up your publisher in the Visual Studio Marketplace.
 
