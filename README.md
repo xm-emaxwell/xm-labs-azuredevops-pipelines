@@ -52,6 +52,7 @@ This is a two-way integration with Azure DevOps Pipelines that provides several 
     * [InvokeRESTAPI_taskPayload.json](AzureDevOps/src/InvokeRESTAPI_taskPayload.json) - body to use with the "Invoke REST API" pipeline task
     * [InvokeRESTAPI_gatePayload.json](AzureDevOps/src/InvokeRESTAPI_gatePayload.json) - body to use with the "Invoke REST API" gate task
     * [azure-pipelines.yml](AzureDevOps/src/azure-pipelines.yml) - an example pipeline yaml config that can be used to setup the demo
+    * [xMatters Extension](AzureDevOps/src/xm-extension) - this is an example Azure DevOps extension you can build and install in your organization. The components can be used in place of the Generic service connection and Invoke REST API task/gate in the instructions.
 
 ---
 # How It Works
@@ -76,6 +77,9 @@ Using the Azure DevOps Invoke REST API task as a release gate you can send a not
 
 ---
 # Installation
+#### :point_right: OPTION
+> These instructions will use the Generic service connection and Invoke REST API task/gate. You can follow these [instructions](AzureDevOps/src/xm-extension/README.md) to build and install an example Azure DevOps extension that will work with this example.
+
 ## xMatters - Setup Inbound Trigger
 #### :blue_book: NOTE
 > If you do not already have an xMatters user specifically for integrations it is recommended to create one. This account should only be used for integrations and not need web login permissions. 
@@ -176,6 +180,9 @@ To use the **Azure DevOps - Queue Build** step we need to setup credentials for 
 ## Azure DevOps - Setup Service Connection
 Azure DevOps will need a Service Connection for the pipeline task and release gate to connect to xMatters.
 
+#### :point_right: OPTION
+> If you install the [example extension](AzureDevOps/src/xm-extension/README.md) you can use the xMatters connection type.
+
 1. Go to **Project Settings** in the Azure DevOps project you want to setup the xMatters integration and open **Service Connections** and select **New service connection**.
 
     <kbd>
@@ -201,6 +208,9 @@ Azure DevOps will need a Service Connection for the pipeline task and release ga
 
 ## Azure DevOps - Setup Pipeline Task
 These instructions explain how to setup the Invoke REST API pipeline task to send a notification to the xMatters **Azure DevOps - Build Task** trigger. The instructions will be setting up a new pipeline using the classic method, but you can use the included yaml config if you like.
+
+#### :point_right: OPTION
+> If you install the [example extension](AzureDevOps/src/xm-extension/README.md) you can use the "xMatters - Workflow HTTP Trigger" task instead of the Invoke REST API task. The yaml configuration is using the Inovke REST API task.
 
 #### :blue_book: NOTE
 > * For learning purposes you probably want to create a Git repo for this example that is accessible from your project. It does not need anything in it.
@@ -280,6 +290,9 @@ These instructions explain how to setup the Invoke REST API pipeline task to sen
 
 ## Azure DevOps - Configure Release
 These instructions explain how to setup the Invoke REST API task as a release gate to send a notification to the xMatters **Azure DevOps - Release Gate** trigger.
+
+#### :point_right: OPTION
+> If you install the [example extension](AzureDevOps/src/xm-extension/README.md) you can use the "xMatters - Workflow HTTP Trigger" gate instead of the Invoke REST API gate.
 
 1. In the project you are setting up the xMatters integration go to Pipelines -> Releases and select **New -> New release pipeline**
 

@@ -13,7 +13,7 @@ This is an example Azure DevOps extension that can be built and installed into y
 # Summary
 This extension will add a xMatters service connection type, pipeline task, and release gate. They work in conjunction with the Azure DevOps Pipelines example workflow.
 
-The same functionality can be acheived just using a Generic service connection and the Invoke REST API task in Azure DevOps. This extension was created to possibly make it a little easier to maintain these configurations.
+The same functionality can be achieved using a Generic service connection and the Invoke REST API task in Azure DevOps. This extension was created to possibly make it a little easier to maintain these configurations.
 
 This is a very basic extension, so there is no validation of user input and such.
 
