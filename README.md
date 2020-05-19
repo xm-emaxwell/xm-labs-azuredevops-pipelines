@@ -467,6 +467,15 @@ You now need to configure the Queue Build flow to point to the example Azure Dev
 
 ---
 # Testing
+
+
+### Example Flow Diagram
+In this test we will follow the path that gets all passing results so that you can see all the integrations work.
+
+<kbd>
+    <img src="media/example-flow.png" width="800">
+</kbd>
+
 1. Login to xMatters as one of the users you gave send permission to the Queue Build form
 2. Go to **Messaging** and select **Queue Build** under the **AZURE DEVOPS PIPELINES**
 
