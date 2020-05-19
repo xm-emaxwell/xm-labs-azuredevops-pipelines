@@ -56,10 +56,10 @@ This is a two-way integration with Azure DevOps Pipelines that provides several 
 
 ---
 # How It Works
-## Start a Pipeline
+### Start a Pipeline
 You can use the ***Azure DevOps - Queue Build*** step to start the configured pipeline. The example flow is triggered by an xMatters event being created, but the trigger could be anything you like. For example if you use Azure DevOps for operational management if xMatters received a notification of an application issue your flow could trigger an Azure DevOps pipeline that restarts a service.
 
-## Trigger xMatters from a Pipeline
+### Trigger xMatters from a Pipeline
 Using the Azure DevOps Invoke REST API task to send a notification to the ***Azure DevOps - Build Task*** trigger we can start an xMatters flow. You can also configure the Azure DevOps Invoke REST API task to implement a callback and in this case you can use the ***Azure DevOps - Build Task Started*** and ***Azure DevOps - Build Task Completed*** steps to update the build task status.
 
 #### :blue_book: NOTE
@@ -67,7 +67,7 @@ Using the Azure DevOps Invoke REST API task to send a notification to the ***Azu
 >
 > * **Invoke REST API (Callback)** - [Examle uses this] If you configure the Azure DevOps Invoke REST API task's *Completion event* for Callback it will trigger the xMatters flow and wait for a callback containing the task status. Use this when you want the task status to reflect the xMatters flow outcome.
 
-## Trigger xMatters from a Release Gate
+### Trigger xMatters from a Release Gate
 Using the Azure DevOps Invoke REST API task as a release gate you can send a notification to the ***Azure DevOps - Release Gate***. In conjunction with the ***Azure DevOps - Update Release Gate*** step you can then update from your flow if the release gate succeeded or failed.
 
 #### :blue_book: NOTE
@@ -75,7 +75,7 @@ Using the Azure DevOps Invoke REST API task as a release gate you can send a not
 > * As Azure DevOps polls through the gates it is waiting for all to succeed. It will not continue on until all gates succeed, so if the workflow sends a fail to the gate the release pipeline will not move on but it will continue to run until the gate failure timeout is reached.  This is true for all gates.
 > * In most cases when using the Invoke REST API task with a release gate you will want to configure its *Completion event* to Callback or the gate will pass on successful reponse from the trigger request to xMatters. It will not wait for the xMatters flow to update the gate status.
 
-## Example Flow Diagram
+### Example Flow Diagram
 
 <kbd>
     <img src="media/example-flow.png" width="800">
