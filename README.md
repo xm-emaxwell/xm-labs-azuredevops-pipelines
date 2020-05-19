@@ -85,7 +85,7 @@ Using the Azure DevOps Invoke REST API task as a release gate you can send a not
 ---
 # Installation
 #### :point_right: OPTION
-> These instructions will use the Generic service connection and Invoke REST API task/gate. You can follow these [instructions](AzureDevOps/src/xm-extension/README.md) to build and install an example Azure DevOps extension that will work with this example.
+> These instructions will use the Generic service connection and Invoke REST API task/gate. You can use this [document](AzureDevOps/src/xm-extension/README.md) to build and install an example Azure DevOps extension that will work with this example.
 
 ## xMatters - Setup Inbound Trigger
 #### :blue_book: NOTE
