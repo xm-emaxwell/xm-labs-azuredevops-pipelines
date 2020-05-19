@@ -3,7 +3,7 @@
     "id": "xmatters-integration-tools",
     "name": "xMatters",
     "version": "0.0.1",
-    "publisher": "e2dmax",
+    "publisher": "<your-publisher-id>",
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services"
