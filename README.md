@@ -529,7 +529,7 @@ You now need to configure the Queue Build flow to point to the example Azure Dev
 
 ---
 # Expanding
-The example is using an approval type workflows to demonstrate triggering flows, sending notifications, and updating Azure DevOps. The xMatters flows can include other steps as well.  This includes things like creating a ServiceNow ticket, Jira Issue, update a Slack/MS Teams channel, update status page, triggering other automation, of course sending notifications, etc.
+The example is using an approval type workflows to demonstrate triggering flows, sending notifications, user responses, and updating Azure DevOps. The xMatters flows can include other steps as well.  This includes things like creating a ServiceNow ticket, Jira Issue, update a Slack/MS Teams channel, update status page, triggering other automation, of course sending notifications, etc.
 
 #### :blue_book: NOTE
 > * **Invoke REST API (ApiResponse)** - If you configure the Azure DevOps Invoke REST API task's *Completion event* for ApiResponse it will trigger the xMatters flow, but it will continue on a successful response from the request. Use this when you want to trigger xMatters but do not care the outcome of the xMatters flow. In this case if you use the *Build Task Started* and *Build Task Completed* steps in your flow they will fail because the task will not exist for the callback.
