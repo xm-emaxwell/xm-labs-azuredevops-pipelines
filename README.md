@@ -1,5 +1,5 @@
 # Azure DevOps - Pipelines
-This is a two-way integration with Azure DevOps Pipelines that provides several different integrations. The first allows you to trigger a pipeline from xMatters. You can also have Azure DevOps trigger xMatters from a pipeline task or release gate and use xMatters steps to update the task or gate status.
+This is a two-way integration with Azure DevOps Pipelines that provides several different integrations. The first allows you to trigger a pipeline from xMatters. You can have Azure DevOps trigger xMatters from a pipeline task or release gate and use xMatters steps to update the task or gate status.  Finally you can configure Azure DevOps to use xMatters to send approval notifications and receive responses.
 
 ### :scroll: DISCLAIMER
 <kbd>
@@ -15,7 +15,8 @@ This is a two-way integration with Azure DevOps Pipelines that provides several 
     * [Azure DevOps - Setup Credentials for xMatters](#azure-devops---setup-credentials-for-xmatters)
     * [Azure DevOps - Setup Service Connection](#azure-devops---setup-service-connection)
     * [Azure DevOps - Setup Pipeline Task](#azure-devops---setup-pipeline-task)
-    * [Azure DevOps - Configure Release](#azure-devops---configure-release)
+    * [Azure DevOps - Configure Release Gate](#azure-devops---configure-release-gate)
+    * [Azure DevOps - Configure Release Approvals](#azure-devops---configure-release-approvals)
     * [xMatters - Configure Azure DevOps Endpoints](xmatters---configure-azure-devops-endpoints)
     * [xMatters - Configure Queue Build Flow](xmatters---configure-queue-build-flow)
 * [Testing](#testing)
@@ -38,14 +39,18 @@ This is a two-way integration with Azure DevOps Pipelines that provides several 
     * Workflows
         * [AzureDevOpsPipelines.zip](xMatters/workflows/AzureDevOpsPipelines.zip) - example workflow containing all the triggers and steps
     * Triggers
-        * [buildTask.js](xMatters/src/triggers/buildTask.js) - source for trigger to recieve pipeline task notifications
-        * [releaseGate.js](xMatters/src/triggers/releaseGate.js) - source for trigger to recieve release gate notifications
+        * [buildTask.js](xMatters/src/triggers/buildTask.js) - source for trigger that recieves Azure DevOps pipeline task notifications
+        * [releaseGate.js](xMatters/src/triggers/releaseGate.js) - source for trigger that recieves Azure DevOps release gate notifications
+        * [releaseApprovalNotice.js](xMatters/src/triggers/releaseApprovalNotice.js) - source for trigger that recieves Azure DevOps release approval notices
     * Steps
-        * [queueBuild.js](xMatters/src/steps/queueBuild.js) - source for step that can trigger a pipeline
-        * [buildTaskStarted.js](xMatters/src/steps/buildTaskStarted.js) - source for step to notify that the pipeline task has started
-        * [buildTaskComplete.js](xMatters/src/steps/buildTaskComplete.js) - source for step to notify that the pipeline task has completed and its result
-        * [updateReleaseGate.js](xMatters/src/steps/updateReleaseGate.js) - source for step to update the release gate status
-        * [checkResponseCount.js](xMatters/src/steps/checkResponseCounts.js) - source for step that checks if the response count meets the configured response threshold for an xMatters event. **Used in the release gate example**
+        * [queueBuild.js](xMatters/src/steps/queueBuild.js) - source for step that can trigger an Azure DevOps pipeline
+        * [buildTaskStarted.js](xMatters/src/steps/buildTaskStarted.js) - source for step to update that the Azure DevOps pipeline task has started
+        * [buildTaskComplete.js](xMatters/src/steps/buildTaskComplete.js) - source for step to update that the Azure DevOps pipeline task has completed and its result
+        * [updateReleaseGate.js](xMatters/src/steps/updateReleaseGate.js) - source for step to update the Azure DevOps release gate status
+        * [checkResponseCount.js](xMatters/src/steps/checkResponseCounts.js) - source for step that checks if the notification response count meets the configured response threshold for an xMatters event. **Used in the release gate example**
+        * [updateReleaseApprovalStatus.js](xMatters/src/steps/updateReleaseApprovalStatus.js) - source for step to update an Azure DevOps release approval status
+        * [searchForUser.js](xMatters/src/steps/searchForUser.js) - source for step to search for an Azure DevOps user and get their descriptor, display name, and email address
+        * [xmFindUserByEmail.js](xMatters/src/steps/xmFindUserByEmail.js) - source for step to search for an xMatters user by email address and return their username and target name.
     * Shared Libraries
         * [base64.js](xMatters/src/sharedLibs/base64.js) - source for library used by some of the steps to encode the callback authentication token
 * Azure DevOps
@@ -56,16 +61,21 @@ This is a two-way integration with Azure DevOps Pipelines that provides several 
 
 ---
 # How It Works
+#### :blue_book: NOTE
+> You do not have to use all of these integrations, but all are contained with in this workflow.
 ### Start a Pipeline
 You can use the ***Azure DevOps - Queue Build*** step to start the configured pipeline. The example flow is triggered by an xMatters event being created, but the trigger could be anything you like. For example if you use Azure DevOps for operational management if xMatters received a notification of an application issue your flow could trigger an Azure DevOps pipeline that restarts a service.
 
-### Trigger xMatters from a Pipeline
+### Trigger xMatters from a Pipeline Task
 Using the Azure DevOps Invoke REST API task to send a notification to the ***Azure DevOps - Build Task*** trigger we can start an xMatters flow. You can also configure the Azure DevOps Invoke REST API task to implement a callback and in this case you can use the ***Azure DevOps - Build Task Started*** and ***Azure DevOps - Build Task Completed*** steps to update the build task status.
 
 #### :blue_book: NOTE
 > * **Invoke REST API (ApiResponse)** - If you configure the Azure DevOps Invoke REST API task's *Completion event* for ApiResponse it will trigger the xMatters flow, but it will continue on a successful response from the request. Use this when you want to trigger xMatters but do not care the outcome of the xMatters flow. In this case if you use the *Build Task Started* and *Build Task Completed* steps in your flow they will fail because the task will not exist for the callback.
 >
 > * **Invoke REST API (Callback)** - [Examle uses this] If you configure the Azure DevOps Invoke REST API task's *Completion event* for Callback it will trigger the xMatters flow and wait for a callback containing the task status. Use this when you want the task status to reflect the xMatters flow outcome.
+
+### Send Release Approval Notices to xMatters
+Azure DevOps Service Hook sends Release deployment approval pending notifications to the ***Azure DevOps - Approval Notice** xMatter trigger, which xMatters then sends notifications to approvers (groups or individuals) via their configured xMatter devices and policies.  This allows for the notificaiton to follow scheduling and escalation policies.  It also allows for notifications to go out on multiple channels (email, sms, push, voice) and for the approver to respond directly from the notification.  There is a second step called ***Azure DevOps - Update Release Approval Status*** used to update Azure DevOps of the approver's response.
 
 ### Trigger xMatters from a Release Gate
 Using the Azure DevOps Invoke REST API task as a release gate you can send a notification to the ***Azure DevOps - Release Gate***. In conjunction with the ***Azure DevOps - Update Release Gate*** step you can then update from your flow if the release gate succeeded or failed.
@@ -74,6 +84,8 @@ Using the Azure DevOps Invoke REST API task as a release gate you can send a not
 > * Azure DevOps release gates use a polling mechanism to check the status of the gates. With each poll the callback information changes, so the flow must handle this and be able to respond with the correct callback information.
 > * As Azure DevOps polls through the gates it is waiting for all to succeed. It will not continue on until all gates succeed, so if the workflow sends a fail to the gate the release pipeline will not move on but it will continue to run until the gate failure timeout is reached.  This is true for all gates.
 > * In most cases when using the Invoke REST API task with a release gate you will want to configure its *Completion event* to Callback or the gate will pass on successful reponse from the trigger request to xMatters. It will not wait for the xMatters flow to update the gate status.
+
+
 
 ### Example Flow Diagram
 
@@ -106,7 +118,7 @@ Using the Azure DevOps Invoke REST API task as a release gate you can send a not
         <img src="media/xm-import-workflow.png" width="700">
     </kbd>
 
-3.  Modify the **Build Task** and **Release Gate** form in the imported workflow and give the integration user sender permissions on the form. [Instructions](https://help.xmatters.com/ondemand/xmodwelcome/communicationplanbuilder/formpermissions.htm)
+3.  Modify the **Build Task**, **Release Gate**, and **Release Approvals** forms in the imported workflow and give the integration user sender permissions on the form. [Instructions](https://help.xmatters.com/ondemand/xmodwelcome/communicationplanbuilder/formpermissions.htm)
 
     <kbd>
         <img src="media/xm-sender-permissions.png" width="700">
@@ -134,10 +146,11 @@ Using the Azure DevOps Invoke REST API task as a release gate you can send a not
 7. Repeat steps 5 and 6 for the **Release Gate - Azure DevOps - Release Gate** trigger in the **Release Gate** flow.
     > :pencil2: *Make sure to save the trigger URL in your notes and label something like Release Trigger Endpoint for later when we configure Azure DevOps.*
 
-
+8. Repeat steps 5 and 6 for the **Release Approvals - Azure DevOps - Approval Notice** trigger in the **Release Approvals** flow.
+    > :pencil2: *Make sure to save the trigger URL in your notes and label something like Release Approvals Endpoint for later when we configure Azure DevOps.*
 
 ## Azure DevOps - Setup Credentials for xMatters
-To use the **Azure DevOps - Queue Build** step we need to setup credentials for xMatters to use to connect to Azure DevOps.
+To use the **Azure DevOps - Queue Build**, **Azure DevOps - Update Release Approval Status**, and **Azure DevOps - Search for User** steps we need to setup credentials for xMatters to use to connect to Azure DevOps.
 
 #### :blue_book: NOTE
 > We will be using a Personal Access Token and as good practice you probably want to use a specific Azure DevOps account for integrations. 
@@ -171,7 +184,15 @@ To use the **Azure DevOps - Queue Build** step we need to setup credentials for 
         <img src="media/ado-patsetup-3.png" width="500">
     </kbd>
 
-5. For this integration the token should only need **Read & execute** access to **Build**, but as of writing this I have only tested with Full Access. If you use this token to perform other actions from xMatters it may need more permissions.
+5. For this integration the token should only need
+    * **Build** - Read & execute
+    * **Release** - Read, write, execute, & manage
+    * **Graph** - Read
+    * **Identity** - Read
+    * **User Profile** - Read
+     
+    #### :blue_book: NOTE
+    > As of writing this I have only tested with Full Access. If you use this token to perform other actions from xMatters it may need more permissions.
 
     <kbd>
         <img src="media/ado-patsetup-4.png" width="500">
@@ -185,7 +206,7 @@ To use the **Azure DevOps - Queue Build** step we need to setup credentials for 
     </kbd>
 
 ## Azure DevOps - Setup Service Connection
-Azure DevOps will need a Service Connection for the pipeline task and release gate to connect to xMatters.
+Azure DevOps will need a Service Connection to connect to xMatters.
 
 #### :point_right: OPTION
 > If you install the [example extension](AzureDevOps/src/xm-extension/README.md) you can use the xMatters connection type.
@@ -295,7 +316,7 @@ These instructions explain how to setup the Invoke REST API pipeline task to sen
         <img src="media/ado-pipeline-9.png" width="600">
     </kbd>
 
-## Azure DevOps - Configure Release
+## Azure DevOps - Configure Release Gate
 These instructions explain how to setup the Invoke REST API task as a release gate to send a notification to the xMatters **Azure DevOps - Release Gate** trigger.
 
 #### :point_right: OPTION
@@ -361,7 +382,7 @@ These instructions explain how to setup the Invoke REST API task as a release ga
         <img src="media/ado-release-9.png" width="500">
     </kbd>
 
-10. Set the followin values for the gate
+10. Set the following values for the gate
     #### :warning: WARNING
     > Be sure to modify the parameters in the body as specified. Especially the xmRecipients field or no one will receive the notification.
 
@@ -393,13 +414,80 @@ These instructions explain how to setup the Invoke REST API task as a release ga
         <img src="media/ado-release-11.png" width="500">
     </kbd>
 
+## Azure DevOps - Configure Release Approvals
+These instructions explain how to configure Azure DevOps to send release approval pending notifications to the xMatters **Azure DevOps - Approval Notice** trigger.
+
+### Configure Pre/Post Approval
+
+1. Go back to your release pipeline and select the **Pre-deployment conditions**
+
+    <kbd>
+        <img src="media/ado-release-6.png" width="600">
+    </kbd>
+
+2. Enable Pre-deployment approvals and enter the users and groups you want the approval to be sent oo
+
+    <kbd>
+        <img src="media/ado-approvals-1.png" width="600">
+    </kbd>
+
+3. Set the other approval conditions how ever you like
+
+### Configure Service Hook
+
+1. Go to **Project Settings** in the Azure DevOps project you want to configure release approval notifications to xMatters and open **Service hooks** and select **Create subscription**.
+
+2. Select **Webhook** as the type then click Next
+
+    <kbd>
+        <img src="media/ado-approval-hook-1.png" width="500">
+    </kbd>
+
+3. Select **Release deployment approval pending** as the event type. You can set the filters how ever you like and click Next.
+
+    <kbd>
+        <img src="media/ado-approval-hook-2.png" width="500">
+    </kbd>
+
+4. Set the following values for the Action.  Leave others as default.
+    * **URL** - endpoint of the xMatters HTTP Trigger **Release Approvals - Azure DevOps - Approval Notice** you got earlier
+    * **Basic authentication username** - the xMatters API key you created earlier
+    * **Basic authentication password** - the xMatters API secret you created earlier
+
+    <br>
+    <kbd>
+        <img src="media/ado-approval-hook-3.png" width="500">
+    </kbd>
+
+5. You can either click **Finish** to save or **Test** to verify it successfuly connects to xMatters trigger.
+
+6. In order for xMatters to find the user when notifying an individual of an approval thier xMatters profile must have a work email device that matches their Azure DevOps account email.
+
+    <kbd>
+        <img src="media/emailmatch-1.png" width="500">
+    </kbd><br>
+
+    <kbd>
+        <img src="media/emailmatch-2.png" width="700">
+    </kbd>
+
+7. In order for xMatters to find the group when notifying a group of an approval the xMatters group must include the Azure DevOps organization name the group is in.
+
+    <kbd>
+        <img src="media/groupmatch-1.png" width="500">
+    </kbd><br>
+
+    <kbd>
+        <img src="media/groupmatch-2.png" width="500">
+    </kbd>
+
 ## xMatters - Configure Azure DevOps Endpoints
 We will now configure the Endpoints in xMatters so that flow steps can connect to Azure DevOps. 
 
 #### :blue_book: NOTE
-> The build queue and pipeline task steps will use a different endpoint than the update release gate step. This is because the release gate update accesses an endpoint at different domain than the others.
+> Azure DevOps has several different domains hosting the API endpoints used in these integrations depending on the endpoint function. To use all the integrations in this workflow three endpoints are required (Azure DevOps, Azure DevOps - Management, and Azure DevOps - Release Management).
 >
-> The pipeline task and update release steps both use the callback token supplied in the Azure DevOps request. The pipeline task can share the same endpoint as the build queue step because they use the same base URL. In the case of the pipeline task the basic auth credentials are ignored by Azure DevOps and it uses the token.
+> The pipeline task and update release steps both use the callback token supplied in the Azure DevOps request. They share the same xMatters endpoint because they use the same base URL as actions that require basic authentication. In the case of the pipeline task and release gate the basic auth credentials are ignored by Azure DevOps and it uses the token.
 
 1. Go back to the example workflow in xMatters and select the **FLOWS** tab. In the top right open the **Components** menu and select **Endpoints**
 
@@ -407,8 +495,8 @@ We will now configure the Endpoints in xMatters so that flow steps can connect t
         <img src="media/xm-taskendpoint-1.png" width="700">
     </kbd>
 
-3. Select the **Azure DevOps** endpoint.
-4. We will need to set or verify these basic settings
+2. Select the **Azure DevOps** endpoint.
+3. Set or verify these basic settings
     * **Name** - I would use "Azure DevOps" because the steps are already set to use this
     * **Base URL** - https://dev.azure.com
     * **Trust self-signed certificates** - disabled
@@ -418,7 +506,7 @@ We will now configure the Endpoints in xMatters so that flow steps can connect t
         <img src="media/xm-endpoint-2.png" width="600">
     </kbd>
 
-5. For the endpoint Authentication we need to set the following
+4. For the endpoint Authentication we need to set the following
     * **Endpoint Type** - Basic
     * **Username** - this will be the Azure DevOps username of the account you created the Personal Access Token
     * **Password** - enter the Personal Access Token
@@ -429,19 +517,52 @@ We will now configure the Endpoints in xMatters so that flow steps can connect t
         <img src="media/xm-endpoint-3.png" width="600">
     </kbd>
 
-6. Click the **Save** button at the bottom
-7. No changes should be required for the **Azure DevOps - Release Gate**. If you want to verify the settings they should be as follows.
-    * **Name** - leave as "Azure DevOps - Release Gate" because the steps are already configured for this
+5. Click the **Save** button at the bottom
+6. Now select the **Azure DevOps - Release Management** endpoint (Used for interacting with release pipelines). Set or verify these basic settings
+    * **Name** - leave as "Azure DevOps - Release Management" because the steps are already configured for this
     * **Base URL** - https://vsrm.dev.azure.com
     * **Trust self-signed certificates** - disabled
-    * **Endpoint Type** - No Authentication (The update release gate step uses the callback auth token supplied in the request from Azure DevOps)
 
     <br>
     <kbd>
         <img src="media/xm-releaseendpoint-1.png" width="600">
     </kbd>
 
-8. Save any further endpoint updates and close the endpoints window.
+7. For the endpoint Authentication we need to set the following
+    * **Endpoint Type** - Basic
+    * **Username** - this will be the Azure DevOps username of the account you created the Personal Access Token
+    * **Password** - enter the Personal Access Token
+    * **Preemptive** - enabled
+
+    <br>
+    <kbd>
+        <img src="media/xm-releaseendpoint-2.png" width="600">
+    </kbd>
+
+8. Click the **Save** button at the bottom
+
+9. Now select the **Azure DevOps - Management** endpoint (Used for ADO management). Set or verify these basic settings
+    * **Name** - leave as "Azure DevOps - Management" because the steps are already configured for this
+    * **Base URL** - https://vssps.dev.azure.com
+    * **Trust self-signed certificates** - disabled
+
+    <br>
+    <kbd>
+        <img src="media/xm-managementendpoint-1.png" width="600">
+    </kbd>
+
+10. For the endpoint Authentication we need to set the following
+    * **Endpoint Type** - Basic
+    * **Username** - this will be the Azure DevOps username of the account you created the Personal Access Token
+    * **Password** - enter the Personal Access Token
+    * **Preemptive** - enabled
+
+    <br>
+    <kbd>
+        <img src="media/xm-managementendpoint-2.png" width="600">
+    </kbd>
+
+11. Click the **Save** button at the bottom
 
 ## xMatters - Configure Queue Build Flow
 You now need to configure the Queue Build flow to point to the example Azure DevOps pipeline you created earlier.
@@ -519,25 +640,31 @@ In this test we will follow the path that gets all passing results so that you c
         <img src="media/xm-testing-7.png" width="300">
     </kbd>
 
-9. Now the example release should be triggered and start.  You should see it waiting on the release gate to pass.
+9. Now the example release pipeline should be triggered and start, but you will see it waiting for the pre-approvals.
+
+10. After a short time the users you configured to get pre-approvals should begin to recieve notifications from xMatters.
+
+11. If they approve and the approval conditions you set are met the release pipeline will continue.
+
+12. You now should see it waiting on the release gate to pass.
 
     <kbd>
         <img src="media/xm-testing-8.png" width="700">
     </kbd>
 
-10. After a short time one of the notification targets you configured in the release gate payload field xmRecipients should recieve a notification similar to below (This is viewed from with xMatters app)
+13. After a short time one of the notification targets you configured in the release gate payload field xmRecipients should recieve a notification similar to below (This is viewed from with xMatters app)
 
     <kbd>
         <img src="media/xm-testing-9.jpg" width="300">
     </kbd>
 
-11. There will be two options, select **Approve**.  If you select **Decline** the gate will never pass and you will have to wait the timeout period for the release to fail.
+14. There will be two options, select **Approve**.  If you select **Decline** the gate will never pass and you will have to wait the timeout period for the release to fail.
 
     <kbd>
         <img src="media/xm-testing-10.jpg" width="300">
     </kbd>
 
-12. You should now see your release complete. Timing can vary especially if you changed the gate evaluation times.
+15. You should now see your release complete. Timing can vary especially if you changed the gate evaluation times.
 
     <kbd>
         <img src="media/xm-testing-11.png" width="700">
@@ -613,3 +740,13 @@ The example is using an approval type workflows to demonstrate triggering flows,
     * Make sure the correct outputs of the trigger step are mapped to the inputs of the update steps.
 * Azure DevOps
     * Make sure you configured the **Invoke REST API** task to use **Callback** as the **Completion event**.  If you leave it as ApiResponse it will succeed on a successful response to the initial request to xMatters, which if everything is configured correctly should be every time. Basically it will ignore the workflow outcome.
+
+## Users not receiving approval notifications
+
+* Azure DevOps
+    * Verify the service hook is configured correctly and using the correct xMatters **Azure DevOps - Approval Notice** HTTP trigger URL along with the API key credentials
+    * Verify the groups and users configured for approvals are also configured in xMatters
+* xMatters
+    * You can view the log in the Workflow Activity panel to help troubleshoot. [Instructions](https://help.xmatters.com/ondemand/xmodwelcome/flowdesigner/activity-panel.htm)
+    * Verify that the xMatters user profiles have a work email device configured with the same email address as their Azure DevOps account
+    * Verify that the xMatters groups are named **adoOrganization/adoGroupName** and the group contains members
